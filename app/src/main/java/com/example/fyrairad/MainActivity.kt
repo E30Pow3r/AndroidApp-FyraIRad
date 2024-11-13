@@ -1,6 +1,8 @@
 package com.example.fyrairad
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -35,6 +37,11 @@ import androidx.compose.ui.unit.dp
 import com.example.fyrairad.ui.theme.FyraIRadTheme
 import kotlinx.coroutines.launch
 import androidx.compose.animation.core.Animatable
+import androidx.compose.runtime.mutableStateOf
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
@@ -43,42 +50,74 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FyraIRadTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    SlideImage()
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.spelfalt),
-                            contentDescription = "FyraIRad Image",
-                            )
-                    }
+                val navController = rememberNavController()
 
-                    Row (
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        for (i in 1..7) {       // Loopar programet så att man får 7 knappar
-                            TextButton(
-                                onClick = { /*TODO*/ },
-                                Modifier
-                                    .height(350.dp)
-                                    .width(54.dp)
-                                    .padding(0.dp)
-                            ) {
-                                Text("$i")
-                            }
-                        }
-                    }
-
-
+                NavHost(navController = navController, startDestination = "lobby") {
+                    composable("spelplan") { PlayScreen(navController) }        // Säger: Dom här ska finnas i min router
+                    composable("lobby") { Lobby(navController) }
                 }
+
+
+            }
+        }
+    }
+}
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun Lobby(navController: NavController) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(50.dp)
+    ){
+        Box(Modifier
+            .align(Alignment.CenterHorizontally)
+        ) {
+            TextButton(onClick = { navController.navigate("spelplan") })
+            {
+                Text("Spela 4 I Rad")
+            }
+        }
+    }
+}
+
+@Composable
+fun PlayScreen(navController: NavController) {
+    val showSlideImage = remember { mutableStateOf(false) }
+
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.spelfalt),
+                contentDescription = "FyraIRad Image",
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            for (i in 1..7) {       // Loopar programet så att man får 7 knappar
+                TextButton(
+                    onClick = { showSlideImage.value = true },
+                    Modifier
+                        .height(350.dp)
+                        .width(54.dp)
+                        .padding(0.dp)
+                ) {
+                    Text("$i")
+                }
+            }
+            if (showSlideImage.value) {
+                SlideImage()
             }
         }
     }
